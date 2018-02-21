@@ -25,9 +25,9 @@ def find_cars(img, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix
     ystart = y_start_stop[0]
     ystop = y_start_stop[1]
     img_tosearch = img[ystart:ystop,xstart:xstop,:]
-    # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
-    ctrans_tosearch = img_tosearch
-    # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YUV')
+    # apply color conversion if other than 'RGB'
+    ctrans_tosearch = convert_color(img, color_space)
+
     if scale != 1:
         imshape = ctrans_tosearch.shape
         ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), np.int(imshape[0]/scale)))

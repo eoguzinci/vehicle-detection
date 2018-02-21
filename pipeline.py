@@ -31,8 +31,10 @@ print('The model is loaded.')
 
 
 def process_image(image):
-
-	box_list = find_cars(image, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+	box_list = []
+	for i in range(len(scales)):
+		box = find_cars(image, x_start_stop, y_start_stop[i], scales[i], svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+		box_list.extend(box)
 	out_img = hot_img(image, box_list)
 	return out_img
 

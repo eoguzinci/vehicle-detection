@@ -81,4 +81,4 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 dist_pickle = {}
 dist_pickle["svc"] = svc
 dist_pickle["X_scaler"] = X_scaler
-pickle.dump( dist_pickle, open( "model.p", "wb" ) )
+pickle.dump( dist_pickle, open( "model_all.p", "wb" ) )

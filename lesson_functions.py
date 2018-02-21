@@ -9,7 +9,6 @@ from settings import *
 def find_cars(img, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
     
     box_list = []
-    draw_img = np.copy(img)
     img = img.astype(np.float32)/255
     
     xstart = x_start_stop[0]
@@ -17,9 +16,23 @@ def find_cars(img, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix
     ystart = y_start_stop[0]
     ystop = y_start_stop[1]
     img_tosearch = img[ystart:ystop,xstart:xstop,:]
-    # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
-    ctrans_tosearch = img_tosearch
-    # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YUV')
+    # # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
+    # ctrans_tosearch = img_tosearch
+    # # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YUV')
+    # apply color conversion if other than 'RGB'
+    if color_space != 'RGB':
+        if color_space == 'HSV':
+            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2HSV)
+        elif color_space == 'LUV':
+            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2LUV)
+        elif color_space == 'HLS':
+            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2HLS)
+        elif color_space == 'YUV':
+            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2YUV)
+        elif color_space == 'YCrCb':
+            ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_RGB2YCrCb)
+    else: ctrans_tosearch = np.copy(img_tosearch)
+
     if scale != 1:
         imshape = ctrans_tosearch.shape
         ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), np.int(imshape[0]/scale)))
@@ -75,7 +88,7 @@ def find_cars(img, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix
             test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))    
             #test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))    
             test_prediction = svc.predict(test_features)
-            
+
             if test_prediction == 1:
                 xbox_left = np.int(xleft*scale)
                 ytop_draw = np.int(ytop*scale)
@@ -83,10 +96,10 @@ def find_cars(img, x_start_stop, y_start_stop, scale, svc, X_scaler, orient, pix
                 top_left = (xstart+xbox_left, ytop_draw+ystart)
                 bottom_right = (xstart+xbox_left+win_draw,ytop_draw+win_draw+ystart)
                 box_list.append((top_left,bottom_right))
-                color = (np.random.randint(0,255), np.random.randint(0,255), np.random.randint(0,255))
-                cv2.rectangle(draw_img,top_left,bottom_right,color,6) 
+                # color = (np.random.randint(0,255), np.random.randint(0,255), np.random.randint(0,255))
+                # cv2.rectangle(draw_img,top_left,bottom_right,(0,0,255),6)
                 
-    return draw_img, box_list
+    return box_list
 
 def convert_color(img, conv='RGB2YCrCb'):
     # const_string = 'cv2.COLOR_'
@@ -254,8 +267,6 @@ def add_heat(heatmap, bbox_list):
         # Add += 1 for all pixels inside each bbox
         # Assuming each "box" takes the form ((x1, y1), (x2, y2))
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
-    plt.figure()
-    plt.imshow(heatmap, cmap="hot")
 
     # Return updated heatmap
     return heatmap# Iterate through list of bboxes
